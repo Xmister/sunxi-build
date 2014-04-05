@@ -1,5 +1,5 @@
 #!/bin/bash
-ADB=/home/xmister/Downloads/android-sdk-linux/platform-tools/adb
+ADB=~/bin/android-sdk-linux/platform-tools/adb
 ${ADB} disconnect
 ${ADB} kill-server
 ${ADB} connect cubie
