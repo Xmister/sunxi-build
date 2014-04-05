@@ -16,7 +16,8 @@ ${MAKE} clean >> $BUILD_LOG 2>&1
 echo "Building kernel..."
 ${MAKE} -j$NUM_THREADS uImage modules >> $BUILD_LOG 2>&1 &
 MPID=$!
-watch -n1 build.log &
+cd ..
+watch -n1 tail build.log &
 WPID=$!
 wait $MPID
 kill $WPID
