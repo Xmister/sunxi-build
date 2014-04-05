@@ -4,8 +4,8 @@ sunxi-build
 Build system for linux-sunxi
 
 1. Update all your path in build.sh, repack.sh, and install.sh
-1.a If you have cubie with USB adb then remove the adb connect from install.sh
-2. Now you should have a structure like:
+2. If you have cubie with USB adb then remove the adb connect from install.sh
+3. Now you should have a structure like:
 ```shell
     |
     |--build.sh
@@ -18,15 +18,15 @@ Build system for linux-sunxi
   cd linux-sunxi
   cp arch/arm/configs/cubieboard_defconfig ./.config
 ```
-3. Build kernel
+5. Build kernel
 ```shell
   ./build.sh
 ```
-4. If it was successful, repack it:
+6. If it was successful, repack it:
 ```shell
   ./repack.sh
 ```
-5. And install to device:
+7. And install to device:
 ```shell
   ./install.sh
 ```
