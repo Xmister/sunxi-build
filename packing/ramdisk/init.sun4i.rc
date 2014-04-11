@@ -27,6 +27,8 @@ on early-init
 	
 
 on fs
+	exec /sbin/busybox mount -t ext4 -o noatime,nosuid,nodev,barrier=0,data=writeback /dev/block/sda2 /mnt/sata
+	exec /sbin/busybox sh /sbin/backup.sh
     #mount ext4 /dev/block/nandd /system wait noatime nodev barrier=0
     mount ext4 /dev/block/nandd /system wait ro noatime nodev barrier=0
     setprop ro.crypto.fuse_sdcard true
@@ -38,10 +40,10 @@ on fs
 	setupfs /dev/block/nande	
 	umount /data
 	exec /system/bin/logwrapper /system/bin/e2fsck -y /dev/block/nande    
+	exec /system/bin/logwrapper /system/bin/fsck_msdos -fy /dev/block/mmcblk0p1 
 	exec /system/bin/busybox mount -t ext4 -o noatime,nodev,barrier=0,journal_checksum,noauto_da_alloc /dev/block/nande /data 
 	exec /system/bin/busybox mount -o bind /data/asec /mnt/secure/asec
 	exec /system/bin/busybox chmod -R 777 /mnt/secure/asec
-	exec /system/bin/busybox mount -t ext4 -o noatime,nosuid,nodev,barrier=0,data=writeback /dev/block/sda2 /mnt/sata
 	exec /system/bin/busybox mount -o bind /dev /data/ubuntu/dev
 	exec /system/bin/busybox mount -o bind /proc /data/ubuntu/proc
 	exec /system/bin/busybox mount -o bind /sys /data/ubuntu/sys
@@ -82,16 +84,24 @@ on boot
 
 # insmod dvb-t modules
 	insmod /system/vendor/modules/dvb-pll.ko
+	insmod /system/vendor/modules/mt2060.ko
+	insmod /system/vendor/modules/qt1010.ko
 	insmod /system/vendor/modules/af9013.ko
+	insmod /system/vendor/modules/mxl5007t.ko
+	insmod /system/vendor/modules/tda18218.ko
+	insmod /system/vendor/modules/tda18271.ko
+	insmod /system/vendor/modules/mc44s803.ko
+	insmod /system/vendor/modules/mxl5005s.ko
+	insmod /system/vendor/modules/dvb-usb-af9005-remote.ko
+	insmod /system/vendor/modules/dvb-usb-af9005.ko
 	insmod /system/vendor/modules/dvb-usb-af9015.ko
 # Create proper ecosystem for tvheadend
-	mkdir /dev/dvb 0777 root root
-	mkdir /dev/dvb/adapter0 0777 root root
-	exec /system/bin/busybox ln -sf /dev/dvb0.frontend0 /dev/dvb/adapter0/frontend0
-	exec /system/bin/busybox ln -sf /dev/dvb0.demux0 /dev/dvb/adapter0/demux0
-	exec /system/bin/busybox ln -sf /dev/dvb0.dvr0 /dev/dvb/adapter0/dvr0
-	exec /system/bin/busybox ln -sf /dev/dvb0.dvr0 /dev/dvb/adapter0/dvr0.ts
-	exec /system/bin/busybox chmod 777 /dev/dvb*
+	mkdir /dev/dvb 0700 root root
+	mkdir /dev/dvb/adapter0 0700 root root
+	exec /system/bin/busybox ln -f /dev/dvb0.frontend0 /dev/dvb/adapter0/frontend0
+	exec /system/bin/busybox ln -f /dev/dvb0.demux0 /dev/dvb/adapter0/demux0
+	exec /system/bin/busybox ln -f /dev/dvb0.dvr0 /dev/dvb/adapter0/dvr0
+	exec /system/bin/busybox ln -f /dev/dvb0.dvr0 /dev/dvb/adapter0/dvr0.ts
 
 # insmod mali driver 
 	insmod /system/vendor/modules/ump.ko
@@ -149,6 +159,9 @@ setprop service.adb.tcp.port 5555
 	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
 	write /sys/class/rfkill/rfkill0/state 0
 	setprop rw.bluetooth.status "0"
+	
+# switch to performance governor
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor performance
 
 # PAN, Bluetooth ReverseTether Dhcp service
 service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL

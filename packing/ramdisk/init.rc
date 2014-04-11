@@ -566,6 +566,14 @@ on property:sys.boot_completed=1
     start preinstall
     start ubuntu
     
+on property:init.svc.bootanim=stopped
+	wait /sdcard/sata 20
+    exec /system/bin/busybox sh /system/bin/sata_sd_mount
+    
+on property:sys.shutdown.requested=1
+    exec /system/bin/busybox chroot /data/ubuntu /stop.sh
+    wait /thereisnosuchfile 5
+    
 # start secure file server
 service securefile /system/bin/securefileserver
 	class main
