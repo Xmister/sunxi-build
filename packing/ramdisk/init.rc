@@ -561,18 +561,24 @@ service ubuntu /system/bin/busybox chroot /data/ubuntu /start.sh
 	group root
 	disabled
 	oneshot
+	
+service sdcheck /system/bin/busybox sh /system/bin/sdcheck.sh
+	user root
+	group root
+	disabled
     
 on property:sys.boot_completed=1
     start preinstall
     start ubuntu
+    start sdcheck
     
 on property:init.svc.bootanim=stopped
-	wait /sdcard/sata 20
+	wait /sdcard/179_1/sata
     exec /system/bin/busybox sh /system/bin/sata_sd_mount
     
 on property:sys.shutdown.requested=1
     exec /system/bin/busybox chroot /data/ubuntu /stop.sh
-    wait /thereisnosuchfile 5
+    wait /thereisnosuchfile
     
 # start secure file server
 service securefile /system/bin/securefileserver

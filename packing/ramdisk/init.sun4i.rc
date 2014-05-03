@@ -24,10 +24,21 @@ on early-init
 	mkdir /mnt/usbhost2 0000 system system
 	mkdir /mnt/usbhost3 0000 system system
 	mkdir /mnt/sata 0000 system system
+	mkdir /mnt/sata2 0000 system system
 	
 
 on fs
-	exec /sbin/busybox mount -t ext4 -o noatime,nosuid,nodev,barrier=0,data=writeback /dev/block/sda2 /mnt/sata
+	#Waiting 20s for USB HDD init
+	wait /dev/hah
+	wait /dev/heh
+	wait /dev/huh
+	wait /dev/hoh
+	wait /dev/block/platform/sw_ahci.0/by-num/p2
+	wait /dev/block/platform/sw_hcd_host0/by-num/p1
+	exec /system/bin/logwrapper /system/bin/e2fsck -y /dev/block/platform/sw_ahci.0/by-num/p2
+	exec /system/bin/logwrapper /system/bin/e2fsck -y /dev/block/platform/sw_hcd_host0/by-num/p1
+	exec /sbin/busybox mount -t ext4 -o noatime,nosuid,nodev,barrier=0,data=writeback /dev/block/platform/sw_ahci.0/by-num/p2 /mnt/sata
+	exec /sbin/busybox mount -t ext4 -o noatime,nosuid,nodev,barrier=0,data=writeback /dev/block/platform/sw_hcd_host0/by-num/p1 /mnt/sata2
 	exec /sbin/busybox sh /sbin/backup.sh
     #mount ext4 /dev/block/nandd /system wait noatime nodev barrier=0
     mount ext4 /dev/block/nandd /system wait ro noatime nodev barrier=0
@@ -40,6 +51,7 @@ on fs
 	setupfs /dev/block/nande	
 	umount /data
 	exec /system/bin/logwrapper /system/bin/e2fsck -y /dev/block/nande    
+	exec /system/bin/logwrapper /system/bin/e2fsck -y /dev/block/mmcblk0p2
 	exec /system/bin/logwrapper /system/bin/fsck_msdos -fy /dev/block/mmcblk0p1 
 	exec /system/bin/busybox mount -t ext4 -o noatime,nodev,barrier=0,journal_checksum,noauto_da_alloc /dev/block/nande /data 
 	exec /system/bin/busybox mount -o bind /data/asec /mnt/secure/asec
@@ -49,6 +61,7 @@ on fs
 	exec /system/bin/busybox mount -o bind /sys /data/ubuntu/sys
 	exec /system/bin/busybox mount -o bind /dev/pts /data/ubuntu/dev/pts
 	exec /system/bin/busybox mount -o bind /mnt/sata /data/ubuntu/mnt/sata
+	exec /system/bin/busybox mount -o bind /mnt/sata2 /data/ubuntu/mnt/sata2
 
 # try to mount /cache
     mount ext4 /dev/block/nandh /cache wait noatime nosuid nodev barrier=0
